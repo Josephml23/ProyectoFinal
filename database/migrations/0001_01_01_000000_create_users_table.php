@@ -15,6 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            
+            // --- AQUÍ AGREGAMOS EL ROL ---
+            // Por defecto, cualquiera que se registre será 'profesor'
+            $table->string('role')->default('profesor'); 
+            
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
