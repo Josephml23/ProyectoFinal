@@ -7,8 +7,8 @@ use App\Models\User;
 use App\Models\Schedule;
 use App\Models\Training;
 use App\Models\SystemLog;
-use App\Models\Classroom; // <--- Modelo Salones
-use App\Models\Cycle;     // <--- Modelo Ciclos
+use App\Models\Classroom;
+use App\Models\Cycle;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,34 +28,55 @@ class DirectorController extends Controller
 
         $logs = SystemLog::latest()->take(10)->get(); 
         
-        // OBTENEMOS LOS CATÁLOGOS DE LA BASE DE DATOS
         $salones = Classroom::all();
         $ciclos = Cycle::all();
 
         return view('director.dashboard', compact('profesores', 'logs', 'salones', 'ciclos'));
     }
 
-    // --- GESTIÓN DE SALONES ---
+    // --- GESTIÓN DE SALONES (CON LOGS) ---
     public function storeClassroom(Request $request) {
         $request->validate(['name' => 'required|unique:classrooms']);
+        
         Classroom::create(['name' => $request->name]);
+        
+        // Registro en el historial
+        $this->logAction('Crear Salón', 'Se agregó el salón: ' . $request->name);
+
         return back()->with('success', 'Salón agregado.');
     }
 
     public function destroyClassroom($id) {
-        Classroom::destroy($id);
+        $classroom = Classroom::findOrFail($id);
+        $nombre = $classroom->name; // Guardamos el nombre antes de borrar para el log
+        $classroom->delete();
+
+        // Registro en el historial
+        $this->logAction('Eliminar Salón', 'Se eliminó el salón: ' . $nombre);
+
         return back()->with('success', 'Salón eliminado.');
     }
 
-    // --- GESTIÓN DE CICLOS ---
+    // --- GESTIÓN DE CICLOS (CON LOGS) ---
     public function storeCycle(Request $request) {
         $request->validate(['name' => 'required|unique:cycles']);
+        
         Cycle::create(['name' => $request->name]);
+
+        // Registro en el historial
+        $this->logAction('Crear Ciclo', 'Se agregó el ciclo: ' . $request->name);
+
         return back()->with('success', 'Ciclo agregado.');
     }
 
     public function destroyCycle($id) {
-        Cycle::destroy($id);
+        $cycle = Cycle::findOrFail($id);
+        $nombre = $cycle->name; // Guardamos el nombre antes de borrar
+        $cycle->delete();
+
+        // Registro en el historial
+        $this->logAction('Eliminar Ciclo', 'Se eliminó el ciclo: ' . $nombre);
+
         return back()->with('success', 'Ciclo eliminado.');
     }
 
@@ -79,14 +100,14 @@ class DirectorController extends Controller
         return back()->with('success', 'Nuevo Profesor registrado.');
     }
 
-    // 3. Ver Perfil (AHORA USA LA BASE DE DATOS)
+    // 3. Ver Perfil
     public function showProfesor($id)
     {
         $profesor = User::findOrFail($id);
         $horarios = $profesor->schedules; 
         $capacitaciones = $profesor->trainings;
 
-        // OBTENEMOS SOLO LOS NOMBRES DE LA BD PARA LOS SELECTS
+        // Obtenemos los nombres desde la BD para los selects
         $salones = Classroom::pluck('name'); 
         $ciclos = Cycle::pluck('name');
         
@@ -139,6 +160,8 @@ class DirectorController extends Controller
             'hora_fin' => $request->hora_fin,
         ]);
 
+        $this->logAction('Asignar Horario', "Aula $request->salon ($request->dia) al profesor ID: $profesor_id");
+
         return back()->with('success', 'Horario agregado correctamente');
     }
 
@@ -149,6 +172,9 @@ class DirectorController extends Controller
             'nombre' => $request->nombre,
             'fecha' => $request->fecha,
         ]);
+
+        $this->logAction('Asignar Capacitación', "$request->nombre al profesor ID: $profesor_id");
+
         return back()->with('success', 'Capacitación agregada');
     }
 
@@ -156,6 +182,10 @@ class DirectorController extends Controller
     {
         $schedule = Schedule::findOrFail($id);
         $schedule->delete();
+
+        // Opcional: Loggear borrado de horario si quieres saturar el log
+        // $this->logAction('Eliminar Horario', 'Se eliminó una clase.');
+
         return back()->with('success', 'Horario eliminado.');
     }
 
@@ -167,4 +197,51 @@ class DirectorController extends Controller
             'detalle' => $detalle
         ]);
     }
-}
+
+// 7. Eliminar Profesor
+    public function destroyProfesor($id)
+    {
+        $profesor = User::findOrFail($id);
+        
+        if ($profesor->role !== 'profesor') {
+            return back()->withErrors(['error' => 'No puedes eliminar a un administrador.']);
+        }
+
+        $nombre = $profesor->name;
+        $profesor->delete();
+
+        $this->logAction('Eliminar Profesor', 'Se dio de baja al docente: ' . $nombre);
+
+        // CAMBIO IMPORTANTE: Redirigir al Dashboard, no "atrás"
+        return redirect()->route('director.dashboard')->with('success', 'Profesor eliminado correctamente.');
+    }   
+
+    // 8. Actualizar Capacitación
+    public function updateTraining(Request $request, $id)
+    {
+        $training = Training::findOrFail($id);
+        
+        $training->update([
+            'nombre' => $request->nombre,
+            'fecha' => $request->fecha,
+        ]);
+
+        $this->logAction('Actualizar Capacitación', "Se editó la capacitación ID: $id a " . $request->nombre);
+
+        return back()->with('success', 'Capacitación actualizada correctamente.');
+    }
+
+    // 9. Eliminar Capacitación
+    public function destroyTraining($id)
+    {
+        $training = Training::findOrFail($id);
+        $nombre = $training->nombre;
+        $training->delete();
+
+        // Log (Opcional)
+        // $this->logAction('Eliminar Capacitación', "Se eliminó: $nombre");
+
+        return back()->with('success', 'Capacitación eliminada.');
+    }
+
+} // Fin de la clase

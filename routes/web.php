@@ -53,6 +53,10 @@ Route::middleware(['auth', 'role:director'])->group(function () {
     Route::post('/director/ciclos', [DirectorController::class, 'storeCycle'])->name('director.cycles.store');
     Route::delete('/director/ciclos/{id}', [DirectorController::class, 'destroyCycle'])->name('director.cycles.destroy');
 
+    Route::delete('/director/profesor/{id}', [DirectorController::class, 'destroyProfesor'])->name('director.profesor.destroy');
+    Route::put('/director/capacitacion/{id}', [DirectorController::class, 'updateTraining'])->name('director.training.update');
+    Route::delete('/director/capacitacion/{id}', [DirectorController::class, 'destroyTraining'])->name('director.training.destroy');
+
 });
 
 
