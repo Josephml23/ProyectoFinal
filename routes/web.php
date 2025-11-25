@@ -1,16 +1,15 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController; // <--- ESTA LÍNEA ES IMPORTANTE
 use App\Http\Controllers\DirectorController;
 use App\Http\Controllers\ProfesorController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-// RUTA DASHBOARD INTELIGENTE
-// Cuando entran a /dashboard, Laravel decide a dónde mandarlos según su rol
+// --- LÓGICA DE REDIRECCIÓN AL ENTRAR ---
 Route::get('/dashboard', function () {
     $role = auth()->user()->role;
     
@@ -22,20 +21,35 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 
-// --- ZONA DEL DIRECTOR ---
-Route::middleware(['auth', 'role:director'])->group(function () {
-    Route::get('/director/panel', [DirectorController::class, 'index'])->name('director.dashboard');
-});
-
-// --- ZONA DEL PROFESOR ---
-Route::middleware(['auth', 'role:profesor'])->group(function () {
-    Route::get('/profesor/panel', [ProfesorController::class, 'index'])->name('profesor.dashboard');
-});
-
+// --- RUTAS QUE FALTABAN (PERFIL) ---
+// Esto arregla el error "Route [profile.edit] not defined"
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+
+// --- ZONA DEL DIRECTOR ---
+Route::middleware(['auth', 'role:director'])->group(function () {
+    // Panel Principal
+    Route::get('/director/panel', [DirectorController::class, 'index'])->name('director.dashboard');
+    
+    // Crear nuevo profesor
+    Route::post('/director/nuevo-profesor', [DirectorController::class, 'storeProfesor'])->name('director.profesor.store');
+
+    // Ver perfil de un profesor específico
+    Route::get('/director/profesor/{id}', [DirectorController::class, 'showProfesor'])->name('director.profesor.show');
+
+    // Guardar Horarios y Capacitaciones
+    Route::post('/director/profesor/{id}/horario', [DirectorController::class, 'storeSchedule'])->name('director.schedule.store');
+    Route::post('/director/profesor/{id}/capacitacion', [DirectorController::class, 'storeTraining'])->name('director.training.store');
+});
+
+
+// --- ZONA DEL PROFESOR ---
+Route::middleware(['auth', 'role:profesor'])->group(function () {
+    Route::get('/profesor/panel', [ProfesorController::class, 'index'])->name('profesor.dashboard');
 });
 
 require __DIR__.'/auth.php';
