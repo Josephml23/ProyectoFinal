@@ -1,11 +1,9 @@
 <?php
-namespace App\Http\Controllers;
-use Illuminate\Http\Request;
 
-class DirectorController extends Controller
+namespace App\Http\Controllers;
+
+abstract class Controller
 {
-    public function index()
-    {
-        return view('director.dashboard');
-    }
+    // Este archivo debe quedarse así, cortito.
+    // Es el padre de todos los controladores.
 }
