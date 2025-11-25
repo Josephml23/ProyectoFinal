@@ -51,24 +51,32 @@ class DirectorController extends Controller
 
         return back()->with('success', 'Nuevo Profesor registrado exitosamente.');
     }
-    public function showProfesor($id)
-    {
-        $profesor = User::findOrFail($id);
-        $horarios = $profesor->schedules; 
-        $capacitaciones = $profesor->trainings;
+public function showProfesor($id)
+{
+    $profesor = User::findOrFail($id);
+    $horarios = $profesor->schedules; 
+    $capacitaciones = $profesor->trainings;
 
-        // Definimos las horas para la tabla (de 7:00 a 22:00)
-        $bloques_horarios = [];
-        for ($i = 7; $i <= 22; $i++) {
-            // Formato 07:00, 08:00, etc.
-            $bloques_horarios[] = str_pad($i, 2, '0', STR_PAD_LEFT) . ':00';
-        }
+    // 1. DEFINIMOS LOS SALONES DISPONIBLES
+    $salones = ['A-101', 'A-102', 'B-201', 'B-202', 'Lab-Computo 1', 'Lab-Computo 2', 'Auditorio'];
 
-        // Definimos los días para la cabecera
-        $dias_semana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    // 2. DEFINIMOS LOS CICLOS DISPONIBLES
+    $ciclos = ['I', 'II', 'III', 'IV', 'V', 'VI'];
 
-        return view('director.profesor_detalle', compact('profesor', 'horarios', 'capacitaciones', 'bloques_horarios', 'dias_semana'));
+    // 3. GENERAMOS BLOQUES DE 30 MINUTOS
+    $bloques_horarios = [];
+    for ($i = 7; $i < 21; $i++) {
+        $hora = str_pad($i, 2, '0', STR_PAD_LEFT);
+        $bloques_horarios[] = $hora . ':00';
+        $bloques_horarios[] = $hora . ':30';
     }
+    $bloques_horarios[] = '21:00';
+
+    $dias_semana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+    // Enviamos $salones y $ciclos a la vista
+    return view('director.profesor_detalle', compact('profesor', 'horarios', 'capacitaciones', 'bloques_horarios', 'dias_semana', 'salones', 'ciclos'));
+}
 
     // 4. Agregar Horario
     public function storeSchedule(Request $request, $profesor_id)
