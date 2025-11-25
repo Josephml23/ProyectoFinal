@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\ProfileController; // <--- ESTA LÍNEA ES IMPORTANTE
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DirectorController;
 use App\Http\Controllers\ProfesorController;
 use Illuminate\Support\Facades\Route;
@@ -21,8 +21,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 
-// --- RUTAS QUE FALTABAN (PERFIL) ---
-// Esto arregla el error "Route [profile.edit] not defined"
+// --- RUTAS DE PERFIL (PROFILE) ---
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -32,18 +31,28 @@ Route::middleware('auth')->group(function () {
 
 // --- ZONA DEL DIRECTOR ---
 Route::middleware(['auth', 'role:director'])->group(function () {
-    // Panel Principal
+    
+    // 1. Panel Principal
     Route::get('/director/panel', [DirectorController::class, 'index'])->name('director.dashboard');
     
-    // Crear nuevo profesor
+    // 2. Gestión de Profesores
     Route::post('/director/nuevo-profesor', [DirectorController::class, 'storeProfesor'])->name('director.profesor.store');
-
-    // Ver perfil de un profesor específico
     Route::get('/director/profesor/{id}', [DirectorController::class, 'showProfesor'])->name('director.profesor.show');
 
-    // Guardar Horarios y Capacitaciones
+    // 3. Gestión de Horarios y Capacitaciones (Profesor específico)
     Route::post('/director/profesor/{id}/horario', [DirectorController::class, 'storeSchedule'])->name('director.schedule.store');
     Route::post('/director/profesor/{id}/capacitacion', [DirectorController::class, 'storeTraining'])->name('director.training.store');
+    Route::delete('/director/horario/{id}', [DirectorController::class, 'destroySchedule'])->name('director.schedule.destroy');
+
+    // 4. GESTIÓN DE CATÁLOGOS (SALONES Y CICLOS) - ¡NUEVO! 👇
+    // Salones
+    Route::post('/director/salones', [DirectorController::class, 'storeClassroom'])->name('director.classrooms.store');
+    Route::delete('/director/salones/{id}', [DirectorController::class, 'destroyClassroom'])->name('director.classrooms.destroy');
+
+    // Ciclos
+    Route::post('/director/ciclos', [DirectorController::class, 'storeCycle'])->name('director.cycles.store');
+    Route::delete('/director/ciclos/{id}', [DirectorController::class, 'destroyCycle'])->name('director.cycles.destroy');
+
 });
 
 

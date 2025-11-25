@@ -7,12 +7,14 @@ use App\Models\User;
 use App\Models\Schedule;
 use App\Models\Training;
 use App\Models\SystemLog;
+use App\Models\Classroom; // <--- Modelo Salones
+use App\Models\Cycle;     // <--- Modelo Ciclos
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
 class DirectorController extends Controller
 {
-    // 1. Dashboard Principal y Buscador
+    // 1. Dashboard Principal
     public function index(Request $request)
     {
         $query = $request->input('search');
@@ -24,12 +26,40 @@ class DirectorController extends Controller
                               ->get();
         }
 
-        $logs = SystemLog::latest()->take(10)->get(); // Últimos 10 movimientos
+        $logs = SystemLog::latest()->take(10)->get(); 
+        
+        // OBTENEMOS LOS CATÁLOGOS DE LA BASE DE DATOS
+        $salones = Classroom::all();
+        $ciclos = Cycle::all();
 
-        return view('director.dashboard', compact('profesores', 'logs'));
+        return view('director.dashboard', compact('profesores', 'logs', 'salones', 'ciclos'));
     }
 
-    // 2. Crear nuevo profesor
+    // --- GESTIÓN DE SALONES ---
+    public function storeClassroom(Request $request) {
+        $request->validate(['name' => 'required|unique:classrooms']);
+        Classroom::create(['name' => $request->name]);
+        return back()->with('success', 'Salón agregado.');
+    }
+
+    public function destroyClassroom($id) {
+        Classroom::destroy($id);
+        return back()->with('success', 'Salón eliminado.');
+    }
+
+    // --- GESTIÓN DE CICLOS ---
+    public function storeCycle(Request $request) {
+        $request->validate(['name' => 'required|unique:cycles']);
+        Cycle::create(['name' => $request->name]);
+        return back()->with('success', 'Ciclo agregado.');
+    }
+
+    public function destroyCycle($id) {
+        Cycle::destroy($id);
+        return back()->with('success', 'Ciclo eliminado.');
+    }
+
+    // 2. Crear Profesor
     public function storeProfesor(Request $request)
     {
         $request->validate([
@@ -38,7 +68,6 @@ class DirectorController extends Controller
             'password' => 'required'
         ]);
         
-        // Aquí está el cambio clave: 'role' => 'profesor'
         User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -46,41 +75,61 @@ class DirectorController extends Controller
             'role' => 'profesor' 
         ]);
 
-        // Guardamos en el historial
         $this->logAction('Registrar Profesor', 'Se registró al docente ' . $request->name);
-
-        return back()->with('success', 'Nuevo Profesor registrado exitosamente.');
+        return back()->with('success', 'Nuevo Profesor registrado.');
     }
-public function showProfesor($id)
-{
-    $profesor = User::findOrFail($id);
-    $horarios = $profesor->schedules; 
-    $capacitaciones = $profesor->trainings;
 
-    // 1. DEFINIMOS LOS SALONES DISPONIBLES
-    $salones = ['A-101', 'A-102', 'B-201', 'B-202', 'Lab-Computo 1', 'Lab-Computo 2', 'Auditorio'];
+    // 3. Ver Perfil (AHORA USA LA BASE DE DATOS)
+    public function showProfesor($id)
+    {
+        $profesor = User::findOrFail($id);
+        $horarios = $profesor->schedules; 
+        $capacitaciones = $profesor->trainings;
 
-    // 2. DEFINIMOS LOS CICLOS DISPONIBLES
-    $ciclos = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+        // OBTENEMOS SOLO LOS NOMBRES DE LA BD PARA LOS SELECTS
+        $salones = Classroom::pluck('name'); 
+        $ciclos = Cycle::pluck('name');
+        
+        $dias_semana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-    // 3. GENERAMOS BLOQUES DE 30 MINUTOS
-    $bloques_horarios = [];
-    for ($i = 7; $i < 21; $i++) {
-        $hora = str_pad($i, 2, '0', STR_PAD_LEFT);
-        $bloques_horarios[] = $hora . ':00';
-        $bloques_horarios[] = $hora . ':30';
+        // Generar horas de 30 en 30 min
+        $horas_opciones = [];
+        for ($i = 7; $i < 22; $i++) {
+            $hora = str_pad($i, 2, '0', STR_PAD_LEFT);
+            $horas_opciones[] = $hora . ':00';
+            if($i < 22) $horas_opciones[] = $hora . ':30';
+        }
+
+        $bloques_horarios = array_filter($horas_opciones, function($h) {
+            return $h < '22:00'; 
+        });
+
+        return view('director.profesor_detalle', compact(
+            'profesor', 'horarios', 'capacitaciones', 
+            'bloques_horarios', 'horas_opciones', 
+            'dias_semana', 'salones', 'ciclos'
+        ));
     }
-    $bloques_horarios[] = '21:00';
-
-    $dias_semana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-
-    // Enviamos $salones y $ciclos a la vista
-    return view('director.profesor_detalle', compact('profesor', 'horarios', 'capacitaciones', 'bloques_horarios', 'dias_semana', 'salones', 'ciclos'));
-}
 
     // 4. Agregar Horario
     public function storeSchedule(Request $request, $profesor_id)
     {
+        if ($request->hora_inicio >= $request->hora_fin) {
+            return back()->withErrors(['error' => 'La hora de fin debe ser posterior a la de inicio.']);
+        }
+
+        $cruce = Schedule::where('user_id', $profesor_id)
+            ->where('dia', $request->dia)
+            ->where(function ($query) use ($request) {
+                $query->where('hora_inicio', '<', $request->hora_fin)
+                      ->where('hora_fin', '>', $request->hora_inicio);
+            })
+            ->exists();
+
+        if ($cruce) {
+            return back()->withErrors(['error' => '¡Conflicto de Horario! Ya existe una clase asignada en ese rango.']);
+        }
+
         Schedule::create([
             'user_id' => $profesor_id,
             'salon' => $request->salon,
@@ -90,11 +139,9 @@ public function showProfesor($id)
             'hora_fin' => $request->hora_fin,
         ]);
 
-        $this->logAction('Asignar Horario', "Aula $request->salon al profesor ID: $profesor_id");
-        return back()->with('success', 'Horario agregado');
+        return back()->with('success', 'Horario agregado correctamente');
     }
 
-    // 5. Agregar Capacitación
     public function storeTraining(Request $request, $profesor_id)
     {
         Training::create([
@@ -102,12 +149,16 @@ public function showProfesor($id)
             'nombre' => $request->nombre,
             'fecha' => $request->fecha,
         ]);
-
-        $this->logAction('Asignar Capacitación', "$request->nombre al profesor ID: $profesor_id");
         return back()->with('success', 'Capacitación agregada');
     }
 
-    // Función auxiliar para guardar historial
+    public function destroySchedule($id)
+    {
+        $schedule = Schedule::findOrFail($id);
+        $schedule->delete();
+        return back()->with('success', 'Horario eliminado.');
+    }
+
     private function logAction($accion, $detalle)
     {
         SystemLog::create([
