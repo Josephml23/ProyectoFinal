@@ -46,4 +46,15 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    // Relación: Un profesor tiene muchos horarios
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
+    }
+
+    // Relación: Un profesor tiene muchas capacitaciones
+    public function trainings()
+    {
+        return $this->hasMany(Training::class);
+    }
 }

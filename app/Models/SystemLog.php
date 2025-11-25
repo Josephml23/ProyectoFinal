@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class SystemLog extends Model
 {
-    //
+    protected $fillable = ['actor', 'accion', 'detalle'];
 }
