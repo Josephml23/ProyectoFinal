@@ -7,27 +7,64 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
+        <!-- Bootstrap 5.3 CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        
+        <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v3.x.x/dist/cdn.min.js" defer></script>
+        <!-- CSS Global Custom (Definición de paleta de colores) -->
+        <style>
+            :root {
+                --color-bg-dark: #17252A;
+                --color-primary: #2B7A78; /* Teal Oscuro */
+                --color-secondary: #3AAFA9; /* Turquesa Claro */
+                --color-white: #FEFFFF;
+                --color-card-bg: #DEF2F1; /* Blanco Hielo */
+                --color-danger: #DC2626; /* Rojo */
+                --color-text-light: #f3f4f6;
+            }
+            body { 
+                font-family: 'Figtree', sans-serif; 
+                background-color: var(--color-white);
+                min-height: 100vh;
+            }
+            .header-transparent {
+                background-color: transparent !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+            .header-transparent .container {
+                padding: 0 !important;
+            }
+            .min-vh-100 {
+                min-height: 100vh;
+            }
+            .text-bg-dark {
+                color: var(--color-bg-dark) !important;
+            }
+        </style>
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div class="min-vh-100">
+            
             @include('layouts.navigation')
 
             @isset($header)
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <header class="header-transparent">
+                    <div class="container header-transparent">
                         {{ $header }}
                     </div>
                 </header>
             @endisset
 
-            <main>
+            <main class="py-4">
                 {{ $slot }}
             </main>
         </div>
+        
+        <!-- Bootstrap JS Bundle (para menús desplegables) -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     </body>
 </html>

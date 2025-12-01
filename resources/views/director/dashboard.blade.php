@@ -1,162 +1,174 @@
-<!-- Carga de estilos de emergencia -->
-<script src="https://cdn.tailwindcss.com"></script>
-
 <x-app-layout>
-    <x-slot name="header">
-        <!-- ENCABEZADO CORREGIDO CON COLOR BLANCO -->
-        <h2 class="font-semibold text-xl text-white leading-tight bg-indigo-700 p-2 rounded-lg shadow-lg">
-            {{ __('Administración - Vagos School') }}
-        </h2>
-    </x-slot>
+    
+    <!-- SIN X-SLOT HEADER -->
+    
+    <div class="container py-4">
+        
+        <!-- MENSAJES DE ÉXITO -->
+        @if(session('success'))
+            <div class="alert alert-success border-start border-4 p-3 mb-4" role="alert" style="border-color: var(--color-primary) !important; background-color: #d1fae5; color: #065f46;">
+                <p class="fw-bold">¡Éxito!</p>
+                <p>{{ session('success') }}</p>
+            </div>
+        @endif
 
-    <div class="py-12 bg-gray-100 min-h-screen">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="row g-4 mb-4">
             
-            <!-- MENSAJES DE ÉXITO -->
-            @if(session('success'))
-                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 shadow" role="alert">
-                    <p class="font-bold">¡Éxito!</p>
-                    <p>{{ session('success') }}</p>
-                </div>
-            @endif
+            <!-- GESTIÓN DE SALONES -->
+            <div class="col-md-6">
+                <div class="card h-100 border-start border-5" style="border-color: var(--color-primary) !important;">
+                    <div class="card-body">
+                        <h3 class="card-title fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--color-primary);">🏫 Gestión de Salones</h3>
+                        
+                        <!-- Formulario Agregar Salón -->
+                        <form action="{{ route('director.classrooms.store') }}" method="POST" class="d-flex gap-2 mb-3">
+                            @csrf
+                            <input type="text" name="name" placeholder="Ej: A-101" required class="form-control form-control-sm">
+                            <button type="submit" class="btn btn-sm text-white" style="background-color: var(--color-primary);">Agregar</button>
+                        </form>
 
-            <!-- SECCIÓN DE GESTIÓN DE CATÁLOGOS -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
-                <!-- GESTIÓN DE SALONES -->
-                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-indigo-500">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">🏫 Gestión de Salones</h3>
-                    
-                    <!-- Formulario Agregar Salón -->
-                    <form action="{{ route('director.classrooms.store') }}" method="POST" class="flex gap-2 mb-4">
-                        @csrf
-                        <input type="text" name="name" placeholder="Ej: A-101" required class="flex-1 rounded border-gray-300 p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-indigo-700 transition">Agregar</button>
-                    </form>
-
-                    <!-- Lista de Salones -->
-                    <ul class="space-y-2 max-h-40 overflow-y-auto pr-2">
-                        @forelse($salones as $salon)
-                            <li class="flex justify-between items-center bg-gray-50 p-2 rounded border">
-                                <span class="font-bold text-gray-700">{{ $salon->name }}</span>
-                                <form action="{{ route('director.classrooms.destroy', $salon->id) }}" method="POST">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700 font-bold px-2" onclick="return confirm('¿Borrar salón?');" title="Eliminar">🗑️</button>
-                                </form>
-                            </li>
-                        @empty
-                            <li class="text-gray-400 text-sm text-center italic">No hay salones registrados.</li>
-                        @endforelse
-                    </ul>
-                </div>
-
-                <!-- GESTIÓN DE CICLOS -->
-                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-purple-500">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">🔄 Gestión de Ciclos</h3>
-                    
-                    <!-- Formulario Agregar Ciclo -->
-                    <form action="{{ route('director.cycles.store') }}" method="POST" class="flex gap-2 mb-4">
-                        @csrf
-                        <input type="text" name="name" placeholder="Ej: Ciclo VI" required class="flex-1 rounded border-gray-300 p-2 text-sm focus:ring-purple-500 focus:border-purple-500">
-                        <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-purple-700 transition">Agregar</button>
-                    </form>
-
-                    <!-- Lista de Ciclos -->
-                    <ul class="space-y-2 max-h-40 overflow-y-auto pr-2">
-                        @forelse($ciclos as $ciclo)
-                            <li class="flex justify-between items-center bg-gray-50 p-2 rounded border">
-                                <span class="font-bold text-gray-700">{{ $ciclo->name }}</span>
-                                <form action="{{ route('director.cycles.destroy', $ciclo->id) }}" method="POST">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700 font-bold px-2" onclick="return confirm('¿Borrar ciclo?');" title="Eliminar">🗑️</button>
-                                </form>
-                            </li>
-                        @empty
-                            <li class="text-gray-400 text-sm text-center italic">No hay ciclos registrados.</li>
-                        @endforelse
-                    </ul>
+                        <!-- Lista de Salones -->
+                        <ul class="list-group list-group-flush" style="max-height: 10rem; overflow-y: auto;">
+                            @forelse($salones as $salon)
+                                <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: var(--color-card-bg);">
+                                    <span class="fw-bold text-dark">{{ $salon->name }}</span>
+                                    <form action="{{ route('director.classrooms.destroy', $salon->id) }}" method="POST">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-link" style="color: var(--color-danger);" onclick="return confirm('¿Borrar salón?');" title="Eliminar">🗑️</button>
+                                    </form>
+                                </li>
+                            @empty
+                                <li class="list-group-item text-center text-muted fst-italic" style="background-color: var(--color-card-bg);">No hay salones registrados.</li>
+                            @endforelse
+                        </ul>
+                    </div>
                 </div>
             </div>
 
-            <!-- BLOQUE 1: BUSCADOR DE PROFESORES -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h3 class="text-lg font-bold text-gray-800 mb-4">🔍 Buscar Profesor</h3>
-                <form method="GET" action="{{ route('director.dashboard') }}" class="flex gap-4">
-                    <input type="text" name="search" placeholder="Escribe el nombre del profesor..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border">
-                    <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 font-bold">Buscar</button>
+            <!-- GESTIÓN DE CICLOS -->
+            <div class="col-md-6">
+                <div class="card h-100 border-start border-5" style="border-color: var(--color-secondary) !important;">
+                    <div class="card-body">
+                        <h3 class="card-title fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--color-secondary);">🔄 Gestión de Ciclos</h3>
+                        
+                        <!-- Formulario Agregar Ciclo -->
+                        <form action="{{ route('director.cycles.store') }}" method="POST" class="d-flex gap-2 mb-3">
+                            @csrf
+                            <input type="text" name="name" placeholder="Ej: Ciclo VI" required class="form-control form-control-sm">
+                            <button type="submit" class="btn btn-sm text-white" style="background-color: var(--color-secondary);">Agregar</button>
+                        </form>
+
+                        <!-- Lista de Ciclos -->
+                        <ul class="list-group list-group-flush" style="max-height: 10rem; overflow-y: auto;">
+                            @forelse($ciclos as $ciclo)
+                                <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: var(--color-card-bg);">
+                                    <span class="fw-bold text-dark">{{ $ciclo->name }}</span>
+                                    <form action="{{ route('director.cycles.destroy', $ciclo->id) }}" method="POST">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-link" style="color: var(--color-danger);" onclick="return confirm('¿Borrar ciclo?');" title="Eliminar">🗑️</button>
+                                    </form>
+                                </li>
+                            @empty
+                                <li class="list-group-item text-center text-muted fst-italic" style="background-color: var(--color-card-bg);">No hay ciclos registrados.</li>
+                            @endforelse
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOQUE 1: BUSCADOR DE PROFESORES -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="card-title fw-bold mb-3">🔍 Buscar Profesor</h3>
+                <form method="GET" action="{{ route('director.dashboard') }}" class="d-flex gap-3">
+                    <input type="text" name="search" placeholder="Escribe el nombre del profesor..." class="form-control form-control-sm">
+                    <button type="submit" class="btn btn-primary btn-sm text-white" style="background-color: var(--color-primary);">Buscar</button>
                 </form>
 
                 @if(isset($profesores) && count($profesores) > 0)
-                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="row g-3 mt-3">
                         @foreach($profesores as $profe)
-                            <div class="relative group">
-                                <a href="{{ route('director.profesor.show', $profe->id) }}" class="block p-4 border border-indigo-200 rounded bg-indigo-50 hover:bg-indigo-100 transition">
-                                    <div class="font-bold text-indigo-700 group-hover:text-indigo-900">{{ $profe->name }}</div>
-                                    <div class="text-sm text-gray-600">{{ $profe->email }}</div>
-                                </a>
-
-                                <!-- Botón de Eliminar (Flotante) -->
-                                <form action="{{ route('director.profesor.destroy', $profe->id) }}" method="POST" class="absolute top-2 right-2">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-gray-400 hover:text-red-600 bg-white rounded-full p-1 shadow hover:shadow-md transition" onclick="return confirm('¿Estás SEGURO de eliminar a {{ $profe->name }}?');" title="Eliminar Profesor">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                        </svg>
-                                    </button>
-                                </form>
+                            <div class="col-md-6">
+                                <div class="card border-primary shadow-sm" style="position: relative; border-color: var(--color-secondary) !important;">
+                                    <div class="card-body p-3">
+                                        <a href="{{ route('director.profesor.show', $profe->id) }}" class="text-decoration-none">
+                                            <div class="fw-bold" style="color: var(--color-primary);">{{ $profe->name }}</div>
+                                            <div class="text-muted" style="font-size: 0.8rem;">{{ $profe->email }}</div>
+                                        </a>
+                                        <!-- Botón de Eliminar (Flotante) -->
+                                        <form action="{{ route('director.profesor.destroy', $profe->id) }}" method="POST" style="position: absolute; top: 0.5rem; right: 0.5rem;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-light p-1" onclick="return confirm('¿Eliminar a {{ $profe->name }}?');" title="Eliminar Profesor">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16" style="color: var(--color-danger);">
+                                                  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                                                  <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2.5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1zM4.5 5.5v9a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-9zM4.5 2h7V1.5h-7zm2-1v1h3V1h-3z"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         @endforeach
                     </div>
                 @elseif(request('search'))
-                    <p class="mt-4 text-red-500 bg-red-50 p-2 rounded">No se encontraron profesores con ese nombre.</p>
+                    <p class="alert alert-danger mt-3">No se encontraron profesores con ese nombre.</p>
                 @endif
             </div>
+        </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- BLOQUE 2: REGISTRAR NUEVO PROFESOR -->
-                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <span>👨‍🏫</span> Registrar Nuevo Profesor
-                    </h3>
-                    
-                    <form method="POST" action="{{ route('director.profesor.store') }}" class="space-y-3">
-                        @csrf
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Nombre del Docente</label>
-                            <input type="text" name="name" placeholder="Ej: Juan Pérez" required class="w-full rounded border border-gray-300 p-2">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Correo Institucional</label>
-                            <input type="email" name="email" placeholder="profe@vagoschool.com" required class="w-full rounded border border-gray-300 p-2">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Contraseña Inicial</label>
-                            <input type="password" name="password" placeholder="********" required class="w-full rounded border border-gray-300 p-2">
-                        </div>
-                        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition font-bold shadow">Registrar Docente</button>
-                    </form>
-                </div>
-
-                <!-- BLOQUE 3: HISTORIAL -->
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">📜 Historial Reciente</h3>
-                    <ul class="space-y-3 overflow-y-auto max-h-64 pr-2">
-                        @if(isset($logs))
-                            @foreach($logs as $log)
-                                <li class="text-sm border-b pb-2 hover:bg-gray-50 p-1 rounded">
-                                    <span class="font-bold text-gray-700">{{ $log->actor }}</span>
-                                    <span class="text-gray-500">{{ $log->accion }}</span>
-                                    <div class="text-xs text-gray-400">{{ $log->created_at->diffForHumans() }}</div>
-                                </li>
-                            @endforeach
-                        @else
-                            <li class="text-gray-500">No hay actividad reciente.</li>
-                        @endif
-                    </ul>
+        <div class="row g-4">
+            <!-- BLOQUE 2: REGISTRAR NUEVO PROFESOR -->
+            <div class="col-md-6">
+                <div class="card h-100 border-start border-5" style="border-color: #3AAFA9 !important;">
+                    <div class="card-body">
+                        <h3 class="card-title fw-bold mb-3 d-flex align-items-center gap-2" style="color: #3AAFA9;">
+                            <span>👨‍🏫</span> Registrar Nuevo Profesor
+                        </h3>
+                        
+                        <form method="POST" action="{{ route('director.profesor.store') }}" class="needs-validation">
+                            @csrf
+                            <div class="mb-3">
+                                <label class="form-label text-muted" style="font-size: 0.8rem;">Nombre del Docente</label>
+                                <input type="text" name="name" placeholder="Ej: Juan Pérez" required class="form-control form-control-sm">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted" style="font-size: 0.8rem;">Correo Institucional</label>
+                                <input type="email" name="email" placeholder="profe@vagoschool.com" required class="form-control form-control-sm">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted" style="font-size: 0.8rem;">Contraseña Inicial</label>
+                                <input type="password" name="password" placeholder="********" required class="form-control form-control-sm">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 mt-2 text-white" style="background-color: #3AAFA9;">Registrar Docente</button>
+                        </form>
+                    </div>
                 </div>
             </div>
 
+            <!-- BLOQUE 3: HISTORIAL -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="card-title fw-bold mb-3">📜 Historial Reciente</h3>
+                        <ul class="list-group list-group-flush" style="max-height: 15rem; overflow-y: auto;">
+                            @if(isset($logs))
+                                @foreach($logs as $log)
+                                    <li class="list-group-item" style="font-size: 0.875rem;">
+                                        <span class="fw-bold text-dark">{{ $log->actor }}</span>
+                                        <span class="text-muted">{{ $log->accion }}</span>
+                                        <div style="font-size: 0.75rem; color: #9ca3af;">{{ $log->created_at->diffForHumans() }}</div>
+                                    </li>
+                                @endforeach
+                            @else
+                                <li class="list-group-item text-muted text-center">No hay actividad reciente.</li>
+                            @endif
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
+
     </div>
 </x-app-layout>
