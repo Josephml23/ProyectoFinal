@@ -11,21 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('trainings', function (Blueprint $table) {
+        Schema::create('courses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('teacher_id')->constrained()->onDelete('cascade');
-            $table->string('tema');
-            $table->text('descripcion')->nullable();
-            $table->date('fecha');
+            $table->string('codigo')->unique(); // ID único del curso (ej: C33985)
+            $table->string('nombre'); // Nombre del curso (ej: Desarrollo Web)
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('trainings');
+        Schema::dropIfExists('courses');
     }
 };

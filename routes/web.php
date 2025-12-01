@@ -37,14 +37,26 @@ Route::middleware(['auth', 'role:director'])->group(function () {
     
     // 2. Gestión de Profesores
     Route::post('/director/nuevo-profesor', [DirectorController::class, 'storeProfesor'])->name('director.profesor.store');
-    Route::get('/director/profesor/{id}', [DirectorController::class, 'showProfesor'])->name('director.profesor.show');
+    
+    // NOTA: Se ha cambiado {id} por {profesor} para la inyección implícita de modelo.
+    Route::get('/director/profesor/{profesor}', [DirectorController::class, 'showProfesor'])->name('director.profesor.show');
+    Route::delete('/director/profesor/{profesor}', [DirectorController::class, 'destroyProfesor'])->name('director.profesor.destroy');
 
     // 3. Gestión de Horarios y Capacitaciones (Profesor específico)
-    Route::post('/director/profesor/{id}/horario', [DirectorController::class, 'storeSchedule'])->name('director.schedule.store');
-    Route::post('/director/profesor/{id}/capacitacion', [DirectorController::class, 'storeTraining'])->name('director.training.store');
+    // NOTA: Se ha cambiado {id} por {profesor} para la inyección implícita de modelo.
+    Route::post('/director/profesor/{profesor}/horario', [DirectorController::class, 'storeSchedule'])->name('director.schedule.store');
     Route::delete('/director/horario/{id}', [DirectorController::class, 'destroySchedule'])->name('director.schedule.destroy');
 
-    // 4. GESTIÓN DE CATÁLOGOS (SALONES Y CICLOS) - ¡NUEVO! 👇
+    Route::post('/director/profesor/{profesor}/capacitacion', [DirectorController::class, 'storeTraining'])->name('director.training.store');
+    Route::put('/director/capacitacion/{id}', [DirectorController::class, 'updateTraining'])->name('director.training.update'); 
+    Route::delete('/director/capacitacion/{id}', [DirectorController::class, 'destroyTraining'])->name('director.training.destroy');
+    
+    // 4. GESTIÓN DE CATÁLOGOS (CURSOS, SALONES Y CICLOS)
+    
+    // Cursos
+    Route::post('/director/cursos', [DirectorController::class, 'storeCourse'])->name('director.courses.store');
+    Route::delete('/director/cursos/{id}', [DirectorController::class, 'destroyCourse'])->name('director.courses.destroy');
+
     // Salones
     Route::post('/director/salones', [DirectorController::class, 'storeClassroom'])->name('director.classrooms.store');
     Route::delete('/director/salones/{id}', [DirectorController::class, 'destroyClassroom'])->name('director.classrooms.destroy');
@@ -52,10 +64,6 @@ Route::middleware(['auth', 'role:director'])->group(function () {
     // Ciclos
     Route::post('/director/ciclos', [DirectorController::class, 'storeCycle'])->name('director.cycles.store');
     Route::delete('/director/ciclos/{id}', [DirectorController::class, 'destroyCycle'])->name('director.cycles.destroy');
-
-    Route::delete('/director/profesor/{id}', [DirectorController::class, 'destroyProfesor'])->name('director.profesor.destroy');
-    Route::put('/director/capacitacion/{id}', [DirectorController::class, 'updateTraining'])->name('director.training.update');
-    Route::delete('/director/capacitacion/{id}', [DirectorController::class, 'destroyTraining'])->name('director.training.destroy');
 
 });
 

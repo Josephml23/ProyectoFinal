@@ -1,4 +1,135 @@
 <x-app-layout>
+    
+    <!-- CSS PERSONALIZADO -->
+    <style>
+        /* --- DEFINICIÓN DE VARIABLES --- */
+        :root {
+            --color-primary: #2B7A78; /* Teal Oscuro (Acción Principal, Títulos) */
+            --color-secondary: #3AAFA9; /* Turquesa Claro (Botones, Destacados) */
+            --color-green: #10b981;
+            --color-red: #DC2626; 
+            --color-danger: var(--color-red); 
+            --color-card-bg: #DEF2F1; /* Blanco Hielo */
+            --color-white: #FEFFFF;
+            --color-text-dark: #1f2937;
+            --color-text-light: #6b7280;
+            --color-bg-light: #f9fafb; /* Fondo de celdas */
+            --color-border: #e5e7eb;
+            --radius: 0.5rem;
+        }
+
+        /* --- LAYOUT GENERAL --- */
+        .container {
+            max-width: 90rem;
+        }
+        .card-body { padding: 1.5rem; }
+        .card-title { color: var(--color-primary); }
+
+        /* --- FORMULARIO Y SELECTS --- */
+        .form-select, .form-control {
+            border: 1px solid var(--color-border);
+            transition: border-color 0.15s;
+        }
+        .form-select:focus, .form-control:focus { border-color: var(--color-primary); box-shadow: 0 0 0 0.25rem rgba(43, 122, 120, 0.25); }
+        .btn-primary { background-color: var(--color-primary); border-color: var(--color-primary); }
+        .btn-primary:hover { background-color: #246a68; border-color: #246a68; }
+
+        /* --- TABLA DE HORARIOS --- */
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse; /* Crucial para eliminar espacio entre celdas */
+            font-size: 0.75rem;
+            table-layout: fixed;
+        }
+        .schedule-table th, .schedule-table td {
+            border: 1px solid var(--color-border);
+        }
+        .table-head-row { background-color: var(--color-primary); color: white; height: 2.5rem; text-align: center; }
+        .time-cell-header { background-color: #f9fafb; width: 10%; }
+        .time-cell { background-color: #f9fafb; width: 10%; font-weight: bold; color: var(--color-text-light); }
+        .table-body-row { height: 3rem; }
+
+        /* --- BLOQUES DE CLASE (CORRECCIÓN CRÍTICA DE ROWSPAN) --- */
+        .class-day-cell { 
+            padding: 0 !important; 
+            vertical-align: top; 
+            background-color: var(--color-card-bg); 
+            height: 3rem;
+        } 
+
+        .class-block-wrapper { 
+            height: 100%; 
+            width: 100%; 
+            position: relative; 
+            overflow: visible;
+        }
+        .class-block {
+            /* SOLUCIÓN FINAL: Usamos margen negativo estricto para solapar bordes */
+            position: absolute;
+            top: -1px; /* Solapar borde superior */
+            right: -1px; /* Solapar borde derecho */
+            bottom: -1px; /* Solapar borde inferior */
+            left: -1px; /* Solapar borde izquierdo */
+            
+            /* Ajustes en margen/tamaño para solapar los bordes */
+            height: calc(100% + 2px); /* +2px para solapar borde superior e inferior */
+            width: calc(100% + 2px); /* +2px para solapar borde izquierdo y derecho */
+            margin-top: -1px;
+            margin-right: -1px; 
+            
+            padding: 0.5rem;
+            border-left: 4px solid;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: filter 0.2s;
+            cursor: pointer;
+            border-radius: 0; 
+            overflow: hidden; 
+            z-index: 1;
+        }
+        .class-block:hover { filter: brightness(0.9); }
+        
+        /* --- ESTILOS DE COLOR DE BLOQUE --- */
+        .c-blue { background-color: #dbeafe; border-color: #3b82f6 !important; color: #1e3a8a; }
+        .c-green { background-color: #d1fae5; border-color: var(--color-green) !important; color: #065f46; }
+        .c-yellow { background-color: #fef3c7; border-color: #f59e0b !important; color: #b45309; }
+        .c-purple { background-color: #ede9fe; border-color: #8b5cf6 !important; color: #6d28d9; }
+
+        .block-time { font-weight: 700; font-size: 0.8rem; line-height: 1; }
+        .block-salon { font-weight: 800; font-size: 0.7rem; text-transform: uppercase; }
+        .block-cycle { font-size: 0.6rem; opacity: 0.8; }
+
+
+        /* Botón de eliminar horario */
+        .btn-delete-schedule {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.25rem;
+            background-color: var(--color-danger);
+            color: white;
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            border: none;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 2;
+        }
+        .class-block:hover .btn-delete-schedule { opacity: 1; }
+
+        /* --- LISTAS DE CAPACITACIONES (Estilos simplificados) --- */
+        .training-list-wrapper { background-color: #f9fafb; border-radius: var(--radius); border: 1px solid #e5e7eb; padding: 1rem; }
+        .btn-delete-catalog { color: var(--color-danger); border: 1px solid #fca5a5; background-color: #fef2f2; }
+        .btn-delete-catalog:hover { color: #b91c1c; background-color: #fee2e2; }
+    </style>
+    
     <div class="container py-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="h4 mb-0 text-dark">Gestión de: {{ $profesor->name }}</h2>
@@ -7,20 +138,18 @@
 
         <div class="row g-4">
             
-            <!-- MOSTRAR ERRORES -->
+            <!-- MOSTRAR ERRORES Y ÉXITO -->
             @if ($errors->any())
                 <div class="col-12">
-                    <div class="alert alert-danger border-start border-5 border-danger p-3" role="alert">
+                    <div class="alert alert-danger border-start border-5 p-3" role="alert" style="border-color: var(--color-danger) !important;">
                         <p class="fw-bold">¡Atención!</p>
                         <p>{{ $errors->first() }}</p>
                     </div>
                 </div>
             @endif
-
-            <!-- MOSTRAR ÉXITO -->
             @if(session('success'))
                 <div class="col-12">
-                    <div class="alert alert-success border-start border-5 border-success p-3" role="alert">
+                    <div class="alert alert-success border-start border-5 p-3" role="alert" style="border-color: var(--color-success) !important;">
                         <p class="fw-bold">¡Éxito!</p>
                         <p>{{ session('success') }}</p>
                     </div>
@@ -29,7 +158,7 @@
 
             <!-- 1. SECCIÓN DE HORARIOS -->
             <div class="col-12">
-                <div class="card border-start border-5" style="border-color: var(--color-primary) !important;">
+                <div class="card border-start border-5" style="border-color: var(--color-primary) !important; background-color: var(--color-card-bg);">
                     <div class="card-body">
                         <h3 class="card-title h5 mb-3" style="color: var(--color-primary);">📅 Gestión de Horarios</h3>
                         
@@ -41,6 +170,13 @@
                                 <label class="form-label text-muted" style="font-size: 0.75rem;">Día</label>
                                 <select name="dia" class="form-select form-select-sm">
                                     @foreach($dias_semana as $d) <option>{{ $d }}</option> @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label text-muted" style="font-size: 0.75rem;">Curso (ID)</label>
+                                <select name="course_codigo" class="form-select form-select-sm">
+                                    @foreach($cursos as $curso) <option value="{{ $curso->codigo }}">{{ $curso->codigo }} ({{ $curso->nombre }})</option> @endforeach
                                 </select>
                             </div>
 
@@ -81,10 +217,10 @@
                         <h4 class="small fw-bold text-muted text-uppercase mb-2">Vista Gráfica Semanal</h4>
                         
                         <div class="table-responsive border rounded shadow-sm">
-                            <table class="table table-bordered table-sm m-0" style="table-layout: fixed;">
+                            <table class="schedule-table">
                                 <thead>
-                                    <tr class="text-white text-center" style="background-color: var(--color-primary);">
-                                        <th style="width: 10%;">Hora</th>
+                                    <tr class="table-head-row">
+                                        <th class="time-cell-header" style="background-color: var(--color-primary); color: white;">Hora</th>
                                         @foreach($dias_semana as $dia)
                                             <th>{{ $dia }}</th>
                                         @endforeach
@@ -93,9 +229,9 @@
                                 
                                 <tbody>
                                     @foreach($bloques_horarios as $hora_bloque)
-                                        <tr style="height: 3rem;">
+                                        <tr class="table-body-row">
                                             
-                                            <td class="text-center small fw-bold" style="background-color: #f9fafb; width: 10%;">
+                                            <td class="time-cell">
                                                 {{ $hora_bloque }}
                                             </td>
 
@@ -120,32 +256,34 @@
                                                 @endphp
 
                                                 @if($es_inicio_bloque)
-                                                    <td rowspan="{{ $filas_a_ocupar }}" class="p-0" style="vertical-align: top;">
-                                                        <div class="h-100 w-100 position-relative p-1">
-                                                            <div class="p-2 border-start border-4 h-100 d-flex flex-column justify-content-center align-items-center rounded shadow-sm"
-                                                                style="background-color: @if(in_array($clase_encontrada->ciclo, ['I','1'])) #dbeafe; border-color: #3b82f6 !important; color: #1e3a8a; 
-                                                                       @elseif(in_array($clase_encontrada->ciclo, ['II','2'])) #d1fae5; border-color: #10b981 !important; color: #065f46;
-                                                                       @elseif(in_array($clase_encontrada->ciclo, ['III','3'])) #fef3c7; border-color: #f59e0b !important; color: #b45309;
-                                                                       @else #ede9fe; border-color: #8b5cf6 !important; color: #6d28d9; @endif">
+                                                    <td rowspan="{{ $filas_a_ocupar }}" class="class-day-cell">
+                                                        <div class="class-block-wrapper">
+                                                            <div class="class-block
+                                                                @if(in_array($clase_encontrada->ciclo, ['I','1'])) c-blue
+                                                                @elseif(in_array($clase_encontrada->ciclo, ['II','2'])) c-green
+                                                                @elseif(in_array($clase_encontrada->ciclo, ['III','3'])) c-yellow
+                                                                @else c-purple @endif">
                                                                 
-                                                                <div class="fw-bold" style="font-size: 0.8rem;">
+                                                                <!-- MOSTRANDO EL CÓDIGO DEL CURSO -->
+                                                                <div class="fw-bolder" style="font-size: 0.8rem; margin-bottom: 0.1rem;">
+                                                                    {{ $clase_encontrada->course_codigo }}
+                                                                </div>
+
+                                                                <div class="block-time">
                                                                     {{ date('H:i', strtotime($clase_encontrada->hora_inicio)) }} - {{ date('H:i', strtotime($clase_encontrada->hora_fin)) }}
                                                                 </div>
-                                                                <div class="fw-bolder text-uppercase mt-1" style="font-size: 0.7rem;">{{ $clase_encontrada->salon }}</div>
-                                                                <div class="small opacity-75" style="font-size: 0.6rem;">Ciclo: {{ $clase_encontrada->ciclo }}</div>
-
-                                                                <!-- Botón Eliminar (Visible al pasar el mouse) -->
-                                                                <form action="{{ route('director.schedule.destroy', $clase_encontrada->id) }}" method="POST" class="position-absolute top-0 end-0 p-1">
+                                                                <div class="block-salon">{{ $clase_encontrada->salon }}</div>
+                                                                <div class="block-cycle">Ciclo: {{ $clase_encontrada->ciclo }}</div>
+                                                                
+                                                                <form action="{{ route('director.schedule.destroy', $clase_encontrada->id) }}" method="POST">
                                                                     @csrf @method('DELETE')
-                                                                    <button type="submit" class="btn btn-sm btn-danger rounded-circle p-0 d-flex justify-content-center align-items-center" style="width: 1.25rem; height: 1.25rem; font-size: 0.75rem;" onclick="return confirm('¿Eliminar horario?');">
-                                                                        &times;
-                                                                    </button>
+                                                                    <button type="submit" class="btn-delete-schedule" onclick="return confirm('¿Eliminar horario?');">✕</button>
                                                                 </form>
                                                             </div>
                                                         </div>
                                                     </td>
                                                 @elseif(!$celda_ocupada)
-                                                    <td class="bg-white p-0"></td>
+                                                    <td class="day-cell" style="background-color: white;"></td>
                                                 @endif
                                             @endforeach
                                         </tr>
@@ -159,7 +297,7 @@
 
             <!-- 2. SECCIÓN CAPACITACIONES -->
             <div class="col-12">
-                <div class="card h-100 border-start border-5" style="border-color: #10b981 !important;">
+                <div class="card h-100 border-start border-5" style="border-color: #10b981 !important; background-color: var(--color-card-bg);">
                     <div class="card-body">
                         <h3 class="card-title h5 mb-3" style="color: #10b981;">🎓 Gestión de Capacitaciones</h3>
                         
@@ -183,7 +321,7 @@
                             
                             <ul class="list-group list-group-flush">
                                 @forelse($capacitaciones as $c)
-                                    <li class="list-group-item d-flex justify-content-between align-items-center rounded mb-1 shadow-sm" style="background-color: #fff;">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center rounded mb-1 shadow-sm" style="background-color: var(--color-white);">
                                         <div class="d-flex align-items-center">
                                             <span class="rounded-circle me-2" style="width: 0.5rem; height: 0.5rem; background-color: #10b981;"></span>
                                             <strong class="text-dark me-2" style="font-size: 0.875rem;">{{ $c->nombre }}</strong>
@@ -199,7 +337,7 @@
                                         </form>
                                     </li>
                                 @empty
-                                    <li class="list-group-item text-center text-muted fst-italic">No hay capacitaciones asignadas.</li>
+                                    <li class="list-group-item text-center text-muted fst-italic" style="background-color: var(--color-white);">No hay capacitaciones asignadas.</li>
                                 @endforelse
                             </ul>
                         </div>
@@ -211,7 +349,7 @@
             <div class="col-12 mt-5">
                 <div class="card border-danger border-2 shadow-sm" style="background-color: #fef2f2;">
                     <div class="card-body">
-                        <h3 class="card-title h5 mb-3 d-flex align-items-center gap-2" style="color: #dc2626;">
+                        <h3 class="card-title h5 mb-3" style="color: #dc2626;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>

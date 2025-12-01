@@ -9,13 +9,23 @@ class Schedule extends Model
 {
     use HasFactory;
 
-    // ESTO ES OBLIGATORIO PARA GUARDAR DATOS
     protected $fillable = [
         'user_id',
+        'course_codigo',
         'salon',
         'ciclo',
         'dia',
         'hora_inicio',
-        'hora_fin',
+        'hora_fin'
     ];
+
+    public function profesor()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_codigo', 'codigo');
+    }
 }
