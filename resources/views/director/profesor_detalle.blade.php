@@ -1,13 +1,13 @@
 <x-app-layout>
     
-    <!-- CSS PERSONALIZADO --><style>
+    <style>
         /* --- DEFINICIÓN DE VARIABLES --- */
         :root {
             --color-primary: #2B7A78; /* Teal Oscuro (Acción Principal, Títulos) */
             --color-secondary: #3AAFA9; /* Turquesa Claro (Botones, Destacados) */
             --color-green: #10b981;
-            --color-red: #DC2626; 
-            --color-danger: var(--color-red); 
+            --color-red: #DC2626;
+            --color-danger: var(--color-red);
             --color-card-bg: #DEF2F1; /* Blanco Hielo */
             --color-white: #FEFFFF;
             --color-text-dark: #1f2937;
@@ -36,7 +36,7 @@
         /* --- TABLA DE HORARIOS --- */
         .schedule-table {
             width: 100%;
-            border-collapse: collapse; 
+            border-collapse: collapse;
             font-size: 0.75rem;
             table-layout: fixed;
         }
@@ -49,30 +49,30 @@
         .table-body-row { height: 3rem; }
 
         /* --- BLOQUES DE CLASE (CORRECCIÓN CRÍTICA DE ROWSPAN) --- */
-        .class-day-cell { 
-            padding: 0 !important; 
-            vertical-align: top; 
-            background-color: var(--color-card-bg); 
+        .class-day-cell {
+            padding: 0 !important;
+            vertical-align: top;
+            background-color: var(--color-card-bg);
             height: 3rem;
-        } 
+        }
 
-        .class-block-wrapper { 
-            height: 100%; 
-            width: 100%; 
-            position: relative; 
+        .class-block-wrapper {
+            height: 100%;
+            width: 100%;
+            position: relative;
             overflow: visible;
         }
         .class-block {
             position: absolute;
-            top: -1px; 
-            right: -1px; 
-            bottom: -1px; 
+            top: -1px;
+            right: -1px;
+            bottom: -1px;
             left: -1px;
             
-            height: calc(100% + 2px); 
-            width: calc(100% + 2px); 
+            height: calc(100% + 2px);
+            width: calc(100% + 2px);
             margin-top: -1px;
-            margin-right: -1px; 
+            margin-right: -1px;
             
             padding: 0.5rem;
             border-left: 4px solid;
@@ -82,8 +82,8 @@
             align-items: center;
             transition: filter 0.2s;
             cursor: pointer;
-            border-radius: 0; 
-            overflow: hidden; 
+            border-radius: 0;
+            overflow: hidden;
             z-index: 1;
         }
         .class-block:hover { filter: brightness(0.9); }
@@ -138,7 +138,6 @@
 
         <div class="row g-4">
             
-            <!-- MOSTRAR ERRORES Y ÉXITO -->
             @if ($errors->any())
                 <div class="col-12">
                     <div class="alert alert-danger border-start border-5 p-3" role="alert" style="border-color: var(--color-danger) !important;">
@@ -160,13 +159,11 @@
                 </div>
             @endif
 
-            <!-- 1. SECCIÓN DE HORARIOS -->
             <div class="col-12">
                 <div class="card border-start border-5" style="border-color: var(--color-primary) !important; background-color: var(--color-card-bg);">
                     <div class="card-body">
                         <h3 class="card-title h5 mb-3" style="color: var(--color-primary);">📅 Gestión de Horarios</h3>
                         
-                        <!-- FORMULARIO DE AGREGAR HORARIO -->
                         <form action="{{ route('director.schedule.store', $profesor->id) }}" method="POST" class="row g-3 mb-4 p-3 border rounded" style="background-color: #f9fafb;">
                             @csrf
                             
@@ -217,7 +214,6 @@
                             </div>
                         </form>
 
-                        <!-- TABLA VISUAL DE HORARIOS -->
                         <h4 class="small fw-bold text-muted text-uppercase mb-2">Vista Gráfica Semanal</h4>
                         
                         <div class="table-responsive border rounded shadow-sm">
@@ -269,7 +265,6 @@
                                                             @endphp
                                                             <div class="class-block color-{{ $color_index }}">
                                                                 
-                                                                <!-- MOSTRANDO EL CÓDIGO DEL CURSO -->
                                                                 <div class="fw-bolder" style="font-size: 0.8rem; margin-bottom: 0.1rem;">
                                                                     {{ $clase_encontrada->course_codigo }}
                                                                 </div>
@@ -280,12 +275,10 @@
                                                                 <div class="block-salon">{{ $clase_encontrada->salon }}</div>
                                                                 <div class="block-cycle">Ciclo: {{ $clase_encontrada->ciclo }}</div>
                                                                 
-                                                                <!-- ELIMINAR HORARIO: USANDO MODAL GENÉRICO -->
                                                                 <form id="delete-schedule-{{ $clase_encontrada->id }}" 
                                                                     action="{{ route('director.schedule.destroy', $clase_encontrada->id) }}" 
                                                                     method="POST">
                                                                     @csrf @method('DELETE')
-                                                                    <!-- CLASE DE ACTIVACIÓN Y MENSAJE DE DATOS -->
                                                                     <button type="button" 
                                                                             class="btn-delete-schedule delete-trigger" 
                                                                             data-form-id="delete-schedule-{{ $clase_encontrada->id }}"
@@ -309,13 +302,11 @@
                 </div>
             </div>
 
-            <!-- 2. SECCIÓN CAPACITACIONES -->
             <div class="col-12">
                 <div class="card h-100 border-start border-5" style="border-color: #10b981 !important; background-color: var(--color-card-bg);">
                     <div class="card-body">
                         <h3 class="card-title h5 mb-3" style="color: #10b981;">🎓 Gestión de Capacitaciones</h3>
                         
-                        <!-- Formulario Agregar -->
                         <form action="{{ route('director.training.store', $profesor->id) }}" method="POST" class="row g-3 mb-4">
                             @csrf
                             <div class="col-md-7">
@@ -329,7 +320,6 @@
                             </div>
                         </form>
 
-                        <!-- Lista de Capacitaciones (USANDO MODAL GENÉRICO) -->
                         <div class="p-3 border rounded" style="background-color: #f9fafb;">
                             <h4 class="small fw-bold text-muted text-uppercase mb-2">Historial de cursos</h4>
                             
@@ -342,10 +332,8 @@
                                             <span class="text-muted" style="font-size: 0.75rem;">({{ date('d/m/Y', strtotime($c->fecha)) }})</span>
                                         </div>
                                         
-                                        <!-- BOTÓN ELIMINAR CAPACITACIÓN -->
                                         <form id="delete-training-{{ $c->id }}" action="{{ route('director.training.destroy', $c->id) }}" method="POST" class="d-flex align-items-center">
                                             @csrf @method('DELETE')
-                                            <!-- CLASE DE ACTIVACIÓN Y MENSAJE DE DATOS -->
                                             <button type="button" 
                                                     class="btn btn-sm btn-delete-catalog delete-trigger" 
                                                     data-form-id="delete-training-{{ $c->id }}"
@@ -363,13 +351,12 @@
                 </div>
             </div>
             
-            <!-- 3. ZONA DE PELIGRO (ELIMINAR PROFESOR) -->
             <div class="col-12 mt-5">
                 <div class="card border-danger border-2 shadow-sm" style="background-color: #fef2f2;">
                     <div class="card-body">
                         <h3 class="card-title h5 mb-3" style="color: #dc2626;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
                             Zona de Peligro
                         </h3>
@@ -378,19 +365,17 @@
                         </p>
                         
                         <div class="d-flex justify-content-end border-top pt-3">
-                            <!-- ELIMINAR PROFESOR: USANDO MODAL GENÉRICO -->
                             <form id="delete-profesor-{{ $profesor->id }}" 
                                 action="{{ route('director.profesor.destroy', $profesor->id) }}" 
                                 method="POST">
                                 @csrf
                                 @method('DELETE')
-                                <!-- CLASE DE ACTIVACIÓN Y MENSAJE DE DATOS -->
                                 <button type="button" 
                                         class="btn btn-danger text-white fw-bold d-flex align-items-center gap-2 delete-trigger" 
                                         data-form-id="delete-profesor-{{ $profesor->id }}"
                                         data-message="¿Estás COMPLETAMENTE SEGURO de eliminar al profesor {{ $profesor->name }}? Esta acción no se puede deshacer.">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                     Eliminar Profesor Definitivamente
                                 </button>
