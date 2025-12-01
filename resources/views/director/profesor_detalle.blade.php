@@ -37,7 +37,7 @@
         /* --- TABLA DE HORARIOS --- */
         .schedule-table {
             width: 100%;
-            border-collapse: collapse; /* Crucial para eliminar espacio entre celdas */
+            border-collapse: collapse; 
             font-size: 0.75rem;
             table-layout: fixed;
         }
@@ -64,16 +64,14 @@
             overflow: visible;
         }
         .class-block {
-            /* SOLUCIÓN FINAL: Usamos margen negativo estricto para solapar bordes */
             position: absolute;
-            top: -1px; /* Solapar borde superior */
-            right: -1px; /* Solapar borde derecho */
-            bottom: -1px; /* Solapar borde inferior */
-            left: -1px; /* Solapar borde izquierdo */
+            top: -1px; 
+            right: -1px; 
+            bottom: -1px; 
+            left: -1px;
             
-            /* Ajustes en margen/tamaño para solapar los bordes */
-            height: calc(100% + 2px); /* +2px para solapar borde superior e inferior */
-            width: calc(100% + 2px); /* +2px para solapar borde izquierdo y derecho */
+            height: calc(100% + 2px); 
+            width: calc(100% + 2px); 
             margin-top: -1px;
             margin-right: -1px; 
             
@@ -143,7 +141,11 @@
                 <div class="col-12">
                     <div class="alert alert-danger border-start border-5 p-3" role="alert" style="border-color: var(--color-danger) !important;">
                         <p class="fw-bold">¡Atención!</p>
-                        <p>{{ $errors->first() }}</p>
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
                 </div>
             @endif
@@ -151,7 +153,7 @@
                 <div class="col-12">
                     <div class="alert alert-success border-start border-5 p-3" role="alert" style="border-color: var(--color-success) !important;">
                         <p class="fw-bold">¡Éxito!</p>
-                        <p>{{ session('success') }}</p>
+                        <p class="mb-0">{{ session('success') }}</p>
                     </div>
                 </div>
             @endif
@@ -275,9 +277,18 @@
                                                                 <div class="block-salon">{{ $clase_encontrada->salon }}</div>
                                                                 <div class="block-cycle">Ciclo: {{ $clase_encontrada->ciclo }}</div>
                                                                 
-                                                                <form action="{{ route('director.schedule.destroy', $clase_encontrada->id) }}" method="POST">
+                                                                <!-- ELIMINAR HORARIO: USANDO MODAL GENÉRICO -->
+                                                                <form id="delete-schedule-{{ $clase_encontrada->id }}" 
+                                                                    action="{{ route('director.schedule.destroy', $clase_encontrada->id) }}" 
+                                                                    method="POST">
                                                                     @csrf @method('DELETE')
-                                                                    <button type="submit" class="btn-delete-schedule" onclick="return confirm('¿Eliminar horario?');">✕</button>
+                                                                    <!-- CLASE DE ACTIVACIÓN Y MENSAJE DE DATOS -->
+                                                                    <button type="button" 
+                                                                            class="btn-delete-schedule delete-trigger" 
+                                                                            data-form-id="delete-schedule-{{ $clase_encontrada->id }}"
+                                                                            data-message="¿Eliminar el horario del curso {{ $clase_encontrada->course_codigo }}?">
+                                                                        ✕
+                                                                    </button>
                                                                 </form>
                                                             </div>
                                                         </div>
@@ -315,7 +326,7 @@
                             </div>
                         </form>
 
-                        <!-- Lista de Capacitaciones (SOLO LECTURA Y ELIMINAR) -->
+                        <!-- Lista de Capacitaciones (USANDO MODAL GENÉRICO) -->
                         <div class="p-3 border rounded" style="background-color: #f9fafb;">
                             <h4 class="small fw-bold text-muted text-uppercase mb-2">Historial de cursos</h4>
                             
@@ -328,10 +339,14 @@
                                             <span class="text-muted" style="font-size: 0.75rem;">({{ date('d/m/Y', strtotime($c->fecha)) }})</span>
                                         </div>
                                         
-                                        <!-- BOTÓN ELIMINAR -->
-                                        <form action="{{ route('director.training.destroy', $c->id) }}" method="POST" class="d-flex align-items-center">
+                                        <!-- BOTÓN ELIMINAR CAPACITACIÓN -->
+                                        <form id="delete-training-{{ $c->id }}" action="{{ route('director.training.destroy', $c->id) }}" method="POST" class="d-flex align-items-center">
                                             @csrf @method('DELETE')
-                                            <button type="submit" class="btn btn-sm text-danger border-danger" style="font-size: 0.65rem; padding: 0.1rem 0.5rem; background-color: #fef2f2;" onclick="return confirm('¿Borrar esta capacitación?');">
+                                            <!-- CLASE DE ACTIVACIÓN Y MENSAJE DE DATOS -->
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-delete-catalog delete-trigger" 
+                                                    data-form-id="delete-training-{{ $c->id }}"
+                                                    data-message="¿Borrar la capacitación '{{ $c->nombre }}'?">
                                                 Eliminar
                                             </button>
                                         </form>
@@ -360,10 +375,17 @@
                         </p>
                         
                         <div class="d-flex justify-content-end border-top pt-3">
-                            <form action="{{ route('director.profesor.destroy', $profesor->id) }}" method="POST">
+                            <!-- ELIMINAR PROFESOR: USANDO MODAL GENÉRICO -->
+                            <form id="delete-profesor-{{ $profesor->id }}" 
+                                action="{{ route('director.profesor.destroy', $profesor->id) }}" 
+                                method="POST">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger text-white fw-bold d-flex align-items-center gap-2" onclick="return confirm('¿Estás COMPLETAMENTE SEGURO? Esta acción no se puede deshacer.');">
+                                <!-- CLASE DE ACTIVACIÓN Y MENSAJE DE DATOS -->
+                                <button type="button" 
+                                        class="btn btn-danger text-white fw-bold d-flex align-items-center gap-2 delete-trigger" 
+                                        data-form-id="delete-profesor-{{ $profesor->id }}"
+                                        data-message="¿Estás COMPLETAMENTE SEGURO de eliminar al profesor {{ $profesor->name }}? Esta acción no se puede deshacer.">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>

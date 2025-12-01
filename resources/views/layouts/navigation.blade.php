@@ -45,16 +45,15 @@
                             {{ __('Perfil') }}
                         </a>
 
-                        <!-- CERRAR SESIÓN CON CONFIRMACIÓN -->
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST">
+                        <!-- CERRAR SESIÓN CON MODAL PERSONALIZADO -->
+                        <a class="dropdown-item logout-trigger" 
+                           href="#">
+                            {{ __('Cerrar Sesión') }}
+                        </a>
+
+                        <!-- Formulario oculto que se envía por JS (ID crucial: logout-form) -->
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                             @csrf
-                            <button type="submit" class="dropdown-item" 
-                                    onclick="event.preventDefault(); 
-                                             if (confirm('¿Estás seguro de que quieres cerrar la sesión?')) { 
-                                                 document.getElementById('logout-form').submit();
-                                             }">
-                                {{ __('Cerrar Sesión') }}
-                            </button>
                         </form>
                     </div>
                 </li>
