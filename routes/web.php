@@ -6,7 +6,7 @@ use App\Http\Controllers\ProfesorController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 // --- LÓGICA DE REDIRECCIÓN AL ENTRAR ---
@@ -70,7 +70,11 @@ Route::middleware(['auth', 'role:director'])->group(function () {
 
 // --- ZONA DEL PROFESOR ---
 Route::middleware(['auth', 'role:profesor'])->group(function () {
+    // Panel
     Route::get('/profesor/panel', [ProfesorController::class, 'index'])->name('profesor.dashboard');
+    
+    // Actualización de Contraseña (Ruta añadida para solucionar el RouteNotFoundException)
+    Route::post('/profesor/update-password', [ProfesorController::class, 'updatePassword'])->name('profesor.update.password');
 });
 
 require __DIR__.'/auth.php';
