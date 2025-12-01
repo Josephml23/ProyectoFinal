@@ -239,7 +239,7 @@
                                                 <td rowspan="{{ $filas_a_ocupar }}" class="class-day-cell">
                                                     <div class="class-block-wrapper">
                                                         @php
-                                                             $color_index = $clase_encontrada->id % 7; 
+                                                                $color_index = $clase_encontrada->id % 7; 
                                                         @endphp
                                                         <div class="class-block color-{{ $color_index }}">
                                                             <div class="block-course">{{ $clase_encontrada->course_codigo }}</div>
@@ -266,43 +266,8 @@
 
 
         <div class="row g-4">
-            <div class="col-lg-6">
-                <div class="card mb-4 border-start border-5" style="border-color: var(--color-secondary) !important; background-color: var(--color-card-bg);">
-                    <div class="card-body">
-                        <h3 class="card-title h5 mb-3" style="color: var(--color-secondary);">🔑 Cambiar Contraseña</h3>
-                        
-                        <form action="{{ route('profesor.update.password') }}" method="POST">
-                            @csrf
-                            <div class="mb-3">
-                                <label class="form-label text-muted" for="current_password" style="font-size: 0.8rem;">Contraseña Actual</label>
-                                <input type="password" id="current_password" name="current_password" required class="form-control form-control-sm @error('current_password', 'updatePassword') is-invalid @enderror">
-                                @error('current_password', 'updatePassword')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label text-muted" for="new_password" style="font-size: 0.8rem;">Nueva Contraseña</label>
-                                <input type="password" id="new_password" name="new_password" required class="form-control form-control-sm @error('new_password', 'updatePassword') is-invalid @enderror">
-                                @error('new_password', 'updatePassword')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label text-muted" for="new_password_confirmation" style="font-size: 0.8rem;">Confirmar Nueva Contraseña</label>
-                                <input type="password" id="new_password_confirmation" name="new_password_confirmation" required class="form-control form-control-sm">
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary btn-sm w-100 mt-2" style="background-color: var(--color-secondary);">
-                                Actualizar Contraseña
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-6">
+            
+            <div class="col-lg-12"> {{-- <--- Cambio aquí a col-lg-12 --}}
                 <div class="card h-100 border-start border-5" style="border-color: var(--color-green) !important; background-color: var(--color-card-bg);">
                     <div class="card-body">
                         <h3 class="card-title h5 mb-3" style="color: var(--color-green);">🎓 Mis Capacitaciones</h3>
@@ -385,11 +350,11 @@
                     botonDescarga.style.display = 'none';
 
                     const opciones = {
-                        margin:       [5, 5, 5, 5], 
-                        filename:     'horario_profesor_{{ $profesor->id ?? 'desconocido' }}.pdf',
-                        image:        { type: 'jpeg', quality: 0.98 },
-                        html2canvas:  { scale: 1.5, logging: true, dpi: 192, letterRendering: true },
-                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' } 
+                        margin:       [5, 5, 5, 5], 
+                        filename:     'horario_profesor_{{ $profesor->id ?? 'desconocido' }}.pdf',
+                        image:        { type: 'jpeg', quality: 0.98 },
+                        html2canvas:  { scale: 1.5, logging: true, dpi: 192, letterRendering: true },
+                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' } 
                     };
 
                     html2pdf().set(opciones).from(elementoADescargar).save()
