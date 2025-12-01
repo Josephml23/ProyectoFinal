@@ -1,7 +1,6 @@
 <x-app-layout>
     
-    <!-- CSS PERSONALIZADO -->
-    <style>
+    <!-- CSS PERSONALIZADO --><style>
         /* --- DEFINICIÓN DE VARIABLES --- */
         :root {
             --color-primary: #2B7A78; /* Teal Oscuro (Acción Principal, Títulos) */
@@ -90,10 +89,13 @@
         .class-block:hover { filter: brightness(0.9); }
         
         /* --- ESTILOS DE COLOR DE BLOQUE --- */
-        .c-blue { background-color: #dbeafe; border-color: #3b82f6 !important; color: #1e3a8a; }
-        .c-green { background-color: #d1fae5; border-color: var(--color-green) !important; color: #065f46; }
-        .c-yellow { background-color: #fef3c7; border-color: #f59e0b !important; color: #b45309; }
-        .c-purple { background-color: #ede9fe; border-color: #8b5cf6 !important; color: #6d28d9; }
+        .color-0 { background-color: #dbeafe; border-color: #3b82f6 !important; color: #1e3a8a; } /* Blue */
+        .color-1 { background-color: #d1fae5; border-color: #10b981 !important; color: #065f46; } /* Green */
+        .color-2 { background-color: #fef3c7; border-color: #f59e0b !important; color: #b45309; } /* Yellow */
+        .color-3 { background-color: #ede9fe; border-color: #8b5cf6 !important; color: #6d28d9; } /* Purple */
+        .color-4 { background-color: #fee2e2; border-color: #ef4444 !important; color: #991b1b; } /* Red */
+        .color-5 { background-color: #e0f2fe; border-color: #0ea5e9 !important; color: #075985; } /* Light Blue */
+        .color-6 { background-color: #e5e7eb; border-color: #6b7280 !important; color: #374151; } /* Gray */
 
         .block-time { font-weight: 700; font-size: 0.8rem; line-height: 1; }
         .block-salon { font-weight: 800; font-size: 0.7rem; text-transform: uppercase; }
@@ -260,11 +262,12 @@
                                                 @if($es_inicio_bloque)
                                                     <td rowspan="{{ $filas_a_ocupar }}" class="class-day-cell">
                                                         <div class="class-block-wrapper">
-                                                            <div class="class-block
-                                                                @if(in_array($clase_encontrada->ciclo, ['I','1'])) c-blue
-                                                                @elseif(in_array($clase_encontrada->ciclo, ['II','2'])) c-green
-                                                                @elseif(in_array($clase_encontrada->ciclo, ['III','3'])) c-yellow
-                                                                @else c-purple @endif">
+                                                            @php
+                                                                // Lógica para asignar un color basado en el ID del horario
+                                                                // Esto garantiza que cada bloque de horario tenga un color diferente.
+                                                                $color_index = $clase_encontrada->id % 7; 
+                                                            @endphp
+                                                            <div class="class-block color-{{ $color_index }}">
                                                                 
                                                                 <!-- MOSTRANDO EL CÓDIGO DEL CURSO -->
                                                                 <div class="fw-bolder" style="font-size: 0.8rem; margin-bottom: 0.1rem;">

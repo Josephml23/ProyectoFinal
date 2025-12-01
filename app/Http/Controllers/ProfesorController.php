@@ -6,9 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\Schedule;
 use App\Models\Training;
 use App\Models\User;
-use App\Models\Course; // Para mostrar el nombre del curso
+use App\Models\Course; 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule; // <-- ¡Importado para la validación de DNI!
 
 class ProfesorController extends Controller
 {
@@ -47,6 +48,41 @@ class ProfesorController extends Controller
             'dias_semana',
             'cursos'
         ));
+    }
+
+    /**
+     * Actualiza los datos de perfil del profesor (nombre, apellido, DNI, dirección).
+     * ESTE ES EL NUEVO MÉTODO QUE FALTABA
+     */
+    public function updateProfile(Request $request)
+    {
+        // Obtener el usuario autenticado (que es el profesor)
+        $profesor = Auth::user();
+        
+        // 1. VALIDACIÓN
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'lastname' => ['required', 'string', 'max:255'],
+            'dni' => [
+                'nullable', 
+                'string', 
+                'max:20', 
+                // Asegura que el DNI sea único, ignorando el DNI actual del profesor
+                Rule::unique('users', 'dni')->ignore($profesor->id),
+            ],
+            'address' => ['nullable', 'string', 'max:255'],
+        ]);
+        
+        // 2. ACTUALIZACIÓN
+        $profesor->name = $request->input('name');
+        $profesor->lastname = $request->input('lastname');
+        $profesor->dni = $request->input('dni');
+        $profesor->address = $request->input('address');
+        
+        $profesor->save();
+        
+        // 3. REDIRECCIÓN con mensaje de éxito
+        return redirect()->route('profesor.dashboard')->with('success', '✅ Perfil actualizado exitosamente.');
     }
 
     /**

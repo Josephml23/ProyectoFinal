@@ -38,12 +38,10 @@ Route::middleware(['auth', 'role:director'])->group(function () {
     // 2. Gestión de Profesores
     Route::post('/director/nuevo-profesor', [DirectorController::class, 'storeProfesor'])->name('director.profesor.store');
     
-    // NOTA: Se ha cambiado {id} por {profesor} para la inyección implícita de modelo.
     Route::get('/director/profesor/{profesor}', [DirectorController::class, 'showProfesor'])->name('director.profesor.show');
     Route::delete('/director/profesor/{profesor}', [DirectorController::class, 'destroyProfesor'])->name('director.profesor.destroy');
 
     // 3. Gestión de Horarios y Capacitaciones (Profesor específico)
-    // NOTA: Se ha cambiado {id} por {profesor} para la inyección implícita de modelo.
     Route::post('/director/profesor/{profesor}/horario', [DirectorController::class, 'storeSchedule'])->name('director.schedule.store');
     Route::delete('/director/horario/{id}', [DirectorController::class, 'destroySchedule'])->name('director.schedule.destroy');
 
@@ -73,8 +71,11 @@ Route::middleware(['auth', 'role:profesor'])->group(function () {
     // Panel
     Route::get('/profesor/panel', [ProfesorController::class, 'index'])->name('profesor.dashboard');
     
-    // Actualización de Contraseña (Ruta añadida para solucionar el RouteNotFoundException)
+    // Actualización de Contraseña
     Route::post('/profesor/update-password', [ProfesorController::class, 'updatePassword'])->name('profesor.update.password');
+    
+    // ✅ RUTA AÑADIDA: Actualización de Perfil
+    Route::put('/profesor/update-profile', [ProfesorController::class, 'updateProfile'])->name('profesor.update.profile');
 });
 
 require __DIR__.'/auth.php';
